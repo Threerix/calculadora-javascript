@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Realista</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --calculator-bg: #2c3e50;
+            --display-bg: #1a252f;
+            --button-bg: #34495e;
+            --button-hover: #4a6741;
+            --button-active: #2c3e50;
+            --operator-bg: #e74c3c;
+            --operator-hover: #c0392b;
+            --text-color: #ecf0f1;
+            --shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .dark-mode {
+            --bg-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --calculator-bg: #1a1a1a;
+            --display-bg: #000;
+            --button-bg: #333;
+            --button-hover: #555;
+            --button-active: #222;
+            --operator-bg: #ff6b6b;
+            --operator-hover: #ee5a5a;
+            --text-color: #fff;
+            --shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .calculator {
+            background: var(--calculator-bg);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+        }
+
+        .display {
+            background: var(--display-bg);
+            color: var(--text-color);
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: right;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            box-shadow: inset 0 5px 10px rgba(0,0,0,0.3);
+            overflow: hidden;
+            word-break: break-all;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .btn-calc {
+            background: var(--button-bg);
+            color: var(--text-color);
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-calc:hover {
+            background: var(--button-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-calc:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+
+        .btn-operator {
+            background: var(--operator-bg);
+            color: white;
+        }
+
+        .btn-operator:hover {
+            background: var(--operator-hover);
+        }
+
+        .btn-equals {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            grid-column: span 2;
+        }
+
+        .btn-equals:hover {
+            background: linear-gradient(45deg, #229954, #27ae60);
+        }
+
+        .btn-clear {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+
+        .btn-clear:hover {
+            background: linear-gradient(45deg, #c0392b, #a93226);
+        }
+
+        .btn-calc::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-calc:active::before {
+            width: 100%;
+            height: 100%;
+        }
+
+        .dark-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 80px;
+            height: 40px;
+            background: #27ae60;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .dark-toggle.dark {
+            background: #7f8c8d;
+        }
+
+        .toggle-slider {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .dark-toggle.dark .toggle-slider {
+            right: 44px;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @media (max-width: 480px) {
+            .calculator {
+                margin: 20px;
+                padding: 20px;
+            }
+            
+            .display {
+                font-size: 2rem;
+                padding: 15px;
+            }
+            
+            .btn-calc {
+                padding: 15px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button class="btn-calc btn-clear" data-action="clear">C</button>
+            <button class="btn-calc btn-operator" data-value="/">/</button>
+            <button class="btn-calc btn-operator" data-value="*">×</button>
+            <button class="btn-calc btn-operator" data-action="delete">⌫</button>
+            
+            <button class="btn-calc" data-value="7">7</button>
+            <button class="btn-calc" data-value="8">8</button>
+            <button class="btn-calc" data-value="9">9</button>
+            <button class="btn-calc btn-operator" data-value="-">-</button>
+            
+            <button class="btn-calc" data-value="4">4</button>
+            <button class="btn-calc" data-value="5">5</button>
+            <button class="btn-calc" data-value="6">6</button>
+            <button class="btn-calc btn-operator" data-value="+">+</button>
+            
+            <button class="btn-calc" data-value="1">1</button>
+            <button class="btn-calc" data-value="2">2</button>
+            <button class="btn-calc" data-value="3">3</button>
+            <button class="btn-calc btn-operator" data-value="^">^</button>
+            
+            <button class="btn-calc" data-value="0">0</button>
+            <button class="btn-calc" data-value=".">.</button>
+            <button class="btn-calc btn-equals" data-action="calculate">=</button>
+        </div>
+    </div>
+
+    <div class="dark-toggle" id="darkToggle">
+        <div class="toggle-slider">
+            <i class="fas fa-sun"></i>
+        </div>
+    </div>
+
+    <script>
+        // Para funcionar sem módulos - versão simplificada
+        let display = document.getElementById('display');
+        let currentInput = '0';
+        let shouldResetDisplay = false;
+
+        // Sons da calculadora
+        function playClickSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (e) {
+                // Som não disponível
+            }
+        }
+
+        // Efeito ripple
+        function createRipple(event) {
+            const button = event.currentTarget;
+            const circle = document.createElement('span');
+            const diameter = Math.max(button.clientWidth, button.clientHeight);
+            const radius = diameter / 2;
+            
+            const rect = button.getBoundingClientRect();
+            circle.style.width = circle.style.height = `${diameter}px`;
+            circle.style.left = `${event.clientX - rect.left - radius}px`;
+            circle.style.top = `${event.clientY - rect.top - radius}px`;
+            circle.classList.add('ripple');
+            
+            const ripple = button.getElementsByClassName('ripple')[0];
+            if (ripple) {
+                ripple.remove();
+            }
+            
+            button.appendChild(circle);
+        }
+
+        function handleButtonClick(event) {
+            const button = event.currentTarget;
+            const value = button.dataset.value;
+            const action = button.dataset.action;
+
+            if (value) {
+                appendToDisplay(value);
+            } else if (action) {
+                switch (action) {
+                    case 'clear':
+                        clearDisplay();
+                        break;
+                    case 'delete':
+                        deleteLast();
+                        break;
+                    case 'calculate':
+                        calculate();
+                        break;
+                }
+            }
+        }
+
+        function appendToDisplay(value) {
+            if (shouldResetDisplay) {
+                currentInput = '';
+                shouldResetDisplay = false;
+            }
+            
+            if (currentInput === '0' && value !== '.') {
+                currentInput = value;
+            } else {
+                currentInput += value;
+            }
+            
+            display.textContent = currentInput;
+        }
+
+        function clearDisplay() {
+            currentInput = '0';
+            display.textContent = currentInput;
+            shouldResetDisplay = false;
+        }
+
+        function deleteLast() {
+            if (currentInput.length > 1) {
+                currentInput = currentInput.slice(0, -1);
+            } else {
+                currentInput = '0';
+            }
+            display.textContent = currentInput;
+        }
+
+        function calculate() {
+            try {
+                let expression = currentInput.replace(/\^/g, '**').replace(/×/g, '*');
+                let result = eval(expression);
+                
+                if (isNaN(result) || !isFinite(result)) {
+                    throw new Error('Operação inválida');
+                }
+                
+                currentInput = result.toString();
+                display.textContent = currentInput;
+                shouldResetDisplay = true;
+            } catch (error) {
+                display.textContent = 'Erro';
+                currentInput = '0';
+                shouldResetDisplay = true;
+            }
+        }
+
+        function toggleDarkMode() {
+            const body = document.body;
+            const toggle = document.getElementById('darkToggle');
+            const icon = toggle.querySelector('i');
+            
+            body.classList.toggle('dark-mode');
+            toggle.classList.toggle('dark');
+            
+            if (body.classList.contains('dark-mode')) {
+                icon.className = 'fas fa-moon';
+            } else {
+                icon.className = 'fas fa-sun';
+            }
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adicionar eventos aos botões
+            document.querySelectorAll('.btn-calc').forEach(button => {
+                button.addEventListener('click', createRipple);
+                button.addEventListener('click', playClickSound);
+                button.addEventListener('click', handleButtonClick);
+            });
+
+            // Dark mode toggle
+            document.getElementById('darkToggle').addEventListener('click', toggleDarkMode);
+
+            // Suporte a teclado
+            document.addEventListener('keydown', function(event) {
+                const key = event.key;
+                
+                if ('0123456789.'.includes(key)) {
+                    appendToDisplay(key);
+                } else if ('+-*/'.includes(key)) {
+                    appendToDisplay(key === '*' ? '×' : key);
+                } else if (key === 'Enter' || key === '=') {
+                    event.preventDefault();
+                    calculate();
+                } else if (key === 'Escape' || key === 'c' || key === 'C') {
+                    clearDisplay();
+                } else if (key === 'Backspace') {
+                    deleteLast();
+                } else if (key === '^') {
+                    appendToDisplay('^');
+                }
+                
+                playClickSound();
+            });
+        });
+    </script>
+</body>
+</html>
